@@ -17,16 +17,16 @@
                                             <input type="text"  hidden  name="edit" value="edit" >
                                         <div class="form-group">
                                             <label class=" form-control-label">First Name</label>
-                                            <input type="text" required name="FName"  placeholder="New First name" value="{{ clinicalEngineer.FName}}"  oninvalid="setCustomValidity('Please enter a valid first name')" pattern="[a-zA-Z]*" class="form-control">
+                                            <input type="text" required name="FName"  placeholder="New First name" value="{{ clinicalEngineer.FName}}"  oninvalid="setCustomValidity('Please enter a valid first name')" pattern="[a-zA-Z]*" oninput="setCustomValidity('')" class="form-control">
                                         </div>
                                         <div class="form-group">
                                             <label class=" form-control-label">Last Name</label>
-                                            <input type="text" required name="LName" placeholder="New Last name" value="{{ clinicalEngineer.LName}}" oninvalid="setCustomValidity('Please enter a valid last name')" pattern="[a-zA-Z]*" class="form-control">
+                                            <input type="text" required name="LName" placeholder="New Last name" value="{{ clinicalEngineer.LName}}" oninvalid="setCustomValidity('Please enter a valid last name')" pattern="[a-zA-Z]*" oninput="setCustomValidity('')" class="form-control">
                                         </div>
 
                                         <div class="form-group">
                                             <label class=" form-control-label">Phone</label>
-                                            <input type="tel" required name="Phone" placeholder="New Phone"  value="{{ clinicalEngineer.Phone}}" oninvalid="setCustomValidity('Please enter a valid phone number')" pattern="[0-9]{10}" class="form-control">
+                                            <input type="tel" required name="Phone" placeholder="New Phone"  value="{{ clinicalEngineer.Phone}}" oninvalid="setCustomValidity('Please enter a valid phone number')" pattern="[0-9]{10}" oninput="setCustomValidity('')" class="form-control">
                                         </div>
                                         <div class="form-group">
                                             <label class=" form-control-label">Age</label>

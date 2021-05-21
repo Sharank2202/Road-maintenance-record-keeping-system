@@ -15,7 +15,7 @@
                                       <input type="text" name="Id" hidden required value="{{ agentSupplier.Id }}" class="form-control">
                                         <div class="form-group">
                                             <label class=" form-control-label">Name</label>
-                                            <input type="text" name="Name" required value="{{ agentSupplier.Name }}" class="form-control">
+                                            <input type="text" name="Name" required value="{{ agentSupplier.Name }}" oninvalid="setCustomValidity('Please enter a valid phone number')" pattern="[a-zA-Z]*" oninput="setCustomValidity('')" class="form-control">
                                         </div>
                                         <div class="form-group">
                                             <label class=" form-control-label">Address</label>
@@ -23,7 +23,7 @@
                                         </div>
                                         <div class="form-group">
                                             <label class=" form-control-label">Phone</label>
-                                            <input type="phone" name="Phone" required  value="0{{ agentSupplier.Phone }}" class="form-control">
+                                            <input type="tel" name="Phone" required  value="{{ agentSupplier.Phone }}" oninvalid="setCustomValidity('Please enter a valid phone number')" pattern="[0-9]{10}" oninput="setCustomValidity('')" class="form-control">
                                         </div>
                                         <div class="form-group">
                                             <label class=" form-control-label">Email</label>
