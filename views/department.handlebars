@@ -20,8 +20,8 @@
                                                 <th>ID</th>
                                                 <th>Name</th>
                                                 <th>Location</th>
-                                                {{!-- <th>Engineers</th>
-                                                <th>Equipment</th> --}}
+                                                <th>Site Supervisors</th>
+                                                <th>Equipments</th>
                                                 <th></th>
                                             </tr>
                                         </thead>
@@ -35,8 +35,8 @@
                                                     <td>{{ this.Name }}</td>
                                                     
                                                     <td class="desc">{{ this.Location }}</td>
-                                                    {{!-- <td>{{ this.Engineers }}</td>
-                                                    <td>{{ this.Equipments }}</td>  --}}
+                                                    <td>{{ this.Engineers }}</td>
+                                                    <td>{{ this.Equipments }}</td> 
                                                     <td>
                                                         <div class="table-data-feature">
                                                             <a href="/report/department/equipments/{{ this.Code }}" class="item" data-toggle="tooltip" data-placement="top" title="More">
