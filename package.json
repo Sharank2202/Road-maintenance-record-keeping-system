@@ -1,7 +1,7 @@
 {
-  "name": "cmms",
+  "name": "rms",
   "version": "1.0.0",
-  "description": "Computerized Maintenance Management System Project",
+  "description": "Road Maintainence Record Keeping System",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

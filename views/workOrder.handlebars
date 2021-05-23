@@ -40,7 +40,7 @@
                                     <td>{{this.Cost}}</td>
                                     <td {{#if this.med}} class="desc" {{/if}}><span {{#if this.high}}class="status--denied"{{/if}} {{#if this.low}}class="status--process" {{/if}}>{{this.Priority}}</span></td>
                                     <td> <img src="images/{{this.EquipmentImage}}" style="height: 50px; width:50px; border-radius: 50%;" > {{this.EquipmentName}}</td>
-                                    <td>  <img src="images/{{this.ClinicalEnginnerImage}}" style="height: 50px; width:50px; border-radius: 50%;" > {{this.ClinicalEnginner}}</td>
+                                    <td>  <img src="images/{{this.SiteSupervisorImage}}" style="height: 50px; width:50px; border-radius: 50%;" > {{this.SiteSupervisor}}</td>
                                    
                                     <td>
                                        <div class="table-data-feature">
@@ -99,7 +99,7 @@
                         <div class="form-group">
                             <label class=" form-control-label">Site Supervisor</label>
                            
-                            <select name="ClinicalEngineerDSSN"required id="select" class="form-control">
+                            <select name="SiteSupervisorDSSN"required id="select" class="form-control">
                                 {{#each Engineers}}
                                     <option value="{{this.DSSN}}">{{this.FName}}{{this.LName}} {{this.DSSN}}</option>
                                 {{/each}}

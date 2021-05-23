@@ -17,7 +17,7 @@
                                     <table class="table table-data2">
                                         <thead>
                                             <tr>
-                                                <th>ID</th>
+                                                {{!-- <th>ID</th> --}}
                                                 <th>Name</th>
                                                 <th>Location</th>
                                                 <th>Site Supervisors</th>
@@ -29,9 +29,9 @@
                                         <tbody>
                                            {{#each departments }} 
                                                 <tr class="tr-shadow">
-                                                    <td>
+                                                    {{!-- <td>
                                                         <span class="block-email">{{ this.Code }}</span>
-                                                    </td>
+                                                    </td> --}}
                                                     <td>{{ this.Name }}</td>
                                                     
                                                     <td class="desc">{{ this.Location }}</td>
@@ -82,10 +82,10 @@
                         <div class="form-group">
                             <label class=" form-control-label">Department</label>
                             <select name="Name"required id="select" class="form-control">
-                                    <option value="R&B">R&B (ROADS AND BUILDINGS)</option>
+                                    <option value="R&B">ROADS AND BUILDINGS</option>
                                     <option value="MRTH">Ministry of Road Transport & Highways, Government of India</option> 
-                                    {{!-- <option value="ICU">ICU</option>
-                                    <option value="CSSD">CSSD</option> --}}
+                                    <option value="NHAI">National Highway Authority of India</option>
+                                    <option value="IRCC">Indian Roads Construction Corporation</option> 
                             </select>
                         </div>
                         <div class="form-group">

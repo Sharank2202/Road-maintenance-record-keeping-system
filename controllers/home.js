@@ -1,15 +1,10 @@
 const bcrypt = require('bcryptjs')
 const Department =require('../models/department');
 const AgentSupplier =require('../models/agent_supplier');
-const BreakDown =require('../models/break_down');
-const ClinicalEngineer =require('../models/clinical_engineer');
+const SiteSupervisor =require('../models/site_supervisor');
 const Equipment =require('../models/equipment');
-const Maintenance =require('../models/maintenance');
-const SparePart =require('../models/spare_part');
 const WorkOrder=require('../models/work_order');
-const DailyInspection = require('../models/dialy_inspection');
-const PpmQuestions =require('../models/ppm_questions')
-const PPM =require('../models/ppm')
+const DailyInspection = require('../models/daily_inspection');
 const moment=require('moment')
 
 exports.homeSignIn=(req,res) => {
@@ -28,12 +23,12 @@ exports.signIn=(req,res) => {
         res.redirect('/views/error.handlebars');
     }
     else{
-        ClinicalEngineer.findOne({where:{Email:email}}).then(clinicalengineer => {
-            if(clinicalengineer){
-             bcrypt.compare(pass, clinicalengineer.Password).then(result => {
+        SiteSupervisor.findOne({where:{Email:email}}).then(sitesupervisor => {
+            if(sitesupervisor){
+             bcrypt.compare(pass, sitesupervisor.Password).then(result => {
                  if(result){
-                  req.session.DSSN=clinicalengineer.DSSN
-                  res.redirect('/engineer/dialyInspection');  
+                  req.session.DSSN=sitesupervisor.DSSN
+                  res.redirect('/engineer/dailyInspection');  
                  }
                  else
                  res.redirect('/views/error.handlebars');    
@@ -50,7 +45,7 @@ exports.signIn=(req,res) => {
 exports.home=(req,res) =>{
     res.render('home',{pageTitle:'Home',Home:true});
 }
-exports.dialyInspectionEngineer=(req,res) =>{
+exports.dailyInspectionEngineer=(req,res) =>{
     engineerId=req.session.DSSN
     Equipment.findAll({include:[{model:Department}]}).then(equipments => {
         const eqs=equipments.map(equipment => {
@@ -60,19 +55,19 @@ exports.dialyInspectionEngineer=(req,res) =>{
                 Department:equipment.Department.Name
             }
         })
-        ClinicalEngineer.findByPk(engineerId).then(engineer => {
+        SiteSupervisor.findByPk(engineerId).then(engineer => {
             const Engineer ={
                 Image:engineer.Image,
                 FName:engineer.FName,
                 LName:engineer.LName
             }
-        res.render('dialyInspectionForm',{layout:'clinicalEngineerLayout',pageTitle:'Dialy Inspection',
+        res.render('dailyInspectionForm',{layout:'siteSupervisorLayout',pageTitle:'Daily Inspection',
         DI:true,equipments:eqs,Engineer:Engineer})
         })
     })
 }
 
-exports.dialyInspectionEngineerPost=(req,res) =>{
+exports.dailyInspectionEngineerPost=(req,res) =>{
  code = req.body.Code
  date = req.body.DATE
  q1 = req.body.Q1
@@ -102,139 +97,39 @@ exports.dialyInspectionEngineerPost=(req,res) =>{
  
  Equipment.findByPk(equipmentId).then(equipment => { 
      if(equipment){
-         ClinicalEngineer.findByPk(engineerId).then(clinicalengineer =>{
-             if(clinicalengineer){
-                    DailyInspection.create({DATE:date,Q1:q1,Q2:q2,Q3:q3,Q4:q4,Q5:q5,Q6:q6,Q7:q7,Q8:q8,EquipmentCode:equipmentId,ClinicalEnginnerDSSN:engineerId})
-                        .then(dailyinspection => res.redirect('/engineer/dialyInspection') )
+         SiteSupervisor.findByPk(engineerId).then(sitesupervisor =>{
+             if(sitesupervisor){
+                    DailyInspection.create({DATE:date,Q1:q1,Q2:q2,Q3:q3,Q4:q4,Q5:q5,Q6:q6,Q7:q7,Q8:q8,EquipmentCode:equipmentId,SiteSupervisorDSSN:engineerId})
+                        .then(dailyinspection => res.redirect('/engineer/dailyInspection') )
             }
             else{
-                res.render('error',{layout:false,pageTitle:'Error',href:'/engineer/dialyInspection',message:'Sorry !!! Could Not Get this Engineer'})
+                res.render('error',{layout:false,pageTitle:'Error',href:'/engineer/dailyInspection',message:'Sorry !!! Could Not Get this Engineer'})
             } 
          })   
      }
      else{
-         res.render('error',{layout:false,pageTitle:'Error',href:'/engineer/dialyInspection',message:'Sorry !!! Could Not Get this Equipment'})
+         res.render('error',{layout:false,pageTitle:'Error',href:'/engineer/dailyInspection',message:'Sorry !!! Could Not Get this Equipment'})
      }
  }).catch(err => {
      if(err){
          console.log(err)
-      res.render('error',{layout:false,pageTitle:'Error',href:'/engineer/dialyInspection',message:'Sorry !!! Could Not Add This Report '})
+      res.render('error',{layout:false,pageTitle:'Error',href:'/engineer/dailyInspection',message:'Sorry !!! Could Not Add This Report '})
      }
        
  })
 
 }
 
-
-
-exports.ppmEngineer=(req,res) =>{
-    engineerId=req.session.DSSN
-    PpmQuestions.findAll({include:[{model:Equipment,include:[{model:Department}]}]}).then(reports=>{
-        const eqs=reports.map(report => {
-            return {
-                Name:report.Equipment.Name,
-                Code:report.Equipment.Code,
-                Department:report.Equipment.Department.Name
-            }
-        })
-        ClinicalEngineer.findByPk(engineerId).then(engineer => {
-            const Engineer ={
-                Image:engineer.Image,
-                FName:engineer.FName,
-                LName:engineer.LName
-            }
-            res.render('deviceForm',{layout:'clinicalEngineerLayout',pageTitle:'Dialy Inspection',
-                PPM:true,equipments:eqs,Engineer:Engineer})
-        })
-    })
-
-}
-exports.ppmEngineerPost=(req,res) =>{
-    code=req.body.Code
-    res.redirect('/engineer/ppm/'+code);
-}
-
-exports.ppmEngineerEquipment =(req,res) => {
-    code=req.params.code
-    engineerId=req.session.DSSN
-    PpmQuestions.findOne({where:{EquipmentCode:code}}).then(ppm => {
-        const Ppm={
-            Q1:ppm.Q1,
-            Q2:ppm.Q2,
-            Q3:ppm.Q3,
-            Q4:ppm.Q4,
-            Q5:ppm.Q5
-        }
-        ClinicalEngineer.findByPk(engineerId).then(engineer => {
-            const Engineer ={
-                Image:engineer.Image,
-                FName:engineer.FName,
-                LName:engineer.LName
-            }
-
-        res.render('ppmForm',{layout:'clinicalEngineerLayout',pageTitle:'Dialy Inspection',
-            PPM:true,ppm:Ppm,Code:code,Engineer:Engineer})
-        })
-    })
-}
-exports.ppmEngineerEquipmentPost=(req,res) =>{
-    date=req.body.DATE
-    equipmentId=req.params.Code
-    engineerId=req.session.DSSN
-    q1 = req.body.Q1
-    q2 = req.body.Q2
-    q3 = req.body.Q3
-    q4 = req.body.Q4
-    q5 = req.body.Q5
-    n1 = req.body.N1
-    n2 = req.body.N2
-    n3 = req.body.N3
-    n4 = req.body.N4
-    n5 = req.body.N5
-    q1 = q1 == "on" ? "on": "off"
-    q2 = q2 == "on" ? "on": "off"
-    q3 = q3 == "on" ? "on": "off"
-    q4 = q4 == "on" ? "on": "off"
-    q5 = q5 == "on" ? "on": "off"
-
-    Equipment.findByPk(equipmentId).then(equipment => { 
-        if(equipment){
-            ClinicalEngineer.findByPk(engineerId).then(clinicalengineer =>{
-                if(clinicalengineer){
-                       PPM.create({DATE:date,Q1:q1,Q2:q2,Q3:q3,Q4:q4,Q5:q5,N1:n1,N2:n2,N3:n3,N4:n4,N5:n5,EquipmentCode:equipmentId,ClinicalEnginnerDSSN:engineerId})
-                           .then(dailyinspection => res.redirect('/engineer/ppm') )
-               }
-               else{
-                   res.render('error',{layout:false,pageTitle:'Error',href:'/engineer/ppm',message:'Sorry !!! Could Not Get this Engineer'})
-               } 
-            })   
-        }
-        else{
-            res.render('error',{layout:false,pageTitle:'Error',href:'/engineer/ppm',message:'Sorry !!! Could Not Get this Equipment'})
-        }
-    }).catch(err => {
-        if(err){
-            console.log(err)
-         res.render('error',{layout:false,pageTitle:'Error',href:'/engineer/ppm',message:'Sorry !!! Could Not Add This Report '})
-        }
-          
-    })
-   
-
-
-
-}
-
 exports.department=(req,res)=>{
 Department.findAll({
-    include:[{model:ClinicalEngineer},{model:Equipment}]
+    include:[{model:SiteSupervisor},{model:Equipment}]
     }).then(departments => {
         const deps = departments.map(department => {       
             return {
                         Name: department.Name,
                         Code: department.Code,
                         Location: department.Location,
-                        Engineers:department.ClinicalEnginners.length,
+                        Engineers:department.SiteSupervisors.length,
                         Equipments:department.Equipment.length
                     }
                 })      
@@ -254,129 +149,31 @@ Department.findAll({
 
 }
 
-exports.maintenance=(req,res)=>{
-    Maintenance.findAll({include:[{model:BreakDown,include:[{model:Equipment,include:[{model:Department}]}]},{model:ClinicalEngineer}]}).then(maintenances => {
-        const m = maintenances.map(main => {
-                  return {
-                    Id:main.Id,
-                    StartDate:main.StartDate,
-                    EndDate:main.EndDate,
-                    BreakDownCode:main.BreakDown.Code,
-                    EquipmentName:main.BreakDown.Equipment.Name,
-                    EquipmentCode:main.BreakDown.Equipment.Code,
-                    EquipmentImage:main.BreakDown.Equipment.Image,
-                    ClinicalEngineer:main.ClinicalEnginner.FName+' '+main.ClinicalEnginner.LName,
-                    ClinicalEngineerImage:main.ClinicalEnginner.Image,
-                    Department:main.BreakDown.Equipment.Department.Name,
-                    Description:main.Description             
-                  }
-                    
-                })
-    BreakDown.findAll({include:[{model:Equipment}]}).then(breakDowns => {
-        const bd=breakDowns.map(breakDown => {
-            return {
-                Code:breakDown.Code,
-                Date:breakDown.DATE,
-                EquipmentName:breakDown.Equipment.Name,
-                EquipmentCode:breakDown.Equipment.Code,
-                Reason:breakDown.Reason
-            }
-
-        })
-     
-    ClinicalEngineer.findAll().then(clinicalEngineers => {
-        const en=clinicalEngineers.map(clinicalEngineer => {
-            return {
-                FName:clinicalEngineer.FName,
-                LName:clinicalEngineer.LName,
-                DSSN:clinicalEngineer.DSSN
-            }
-        })
-        res.render('maintenance',{pageTitle:'Maintenance',
-                                    Maintenance:true,Maintenances:m,
-                                    hasMaintenance:m.length>0,Engineers:en,breakDowns:bd});
-    })    
-    })
-
-
-    }).catch(err => {
-        if(err)
-          console.log(err)
-          res.render('error',{layout:false,pageTitle:'Error',href:'/home',message:'Sorry !!! Could Not get any maintenance'})
-    })
-
-
-}
-
-
-exports.clinicalEngineer=(req,res)=>{
-    ClinicalEngineer.findAll({include:[{model:Department}]}).then(clinicalEngineers=>{
-        const clinicalengineers=clinicalEngineers.map(clinicalengineer => {     
+exports.siteSupervisor=(req,res)=>{
+    SiteSupervisor.findAll({include:[{model:Department}]}).then(siteSupervisors=>{
+        const sitesupervisors=siteSupervisors.map(sitesupervisor => {     
             return{
-                DSSN:clinicalengineer.DSSN,
-                FName:clinicalengineer.FName,
-                LName:clinicalengineer.LName,
-                Image:clinicalengineer.Image,
-                Adress:clinicalengineer.Adress,
-                Phone:clinicalengineer.Phone,
-                Email:clinicalengineer.Email,
-                Age:clinicalengineer.Age,
-                WorkHours:clinicalengineer.WorkHours,
-                DepartmentCode:clinicalengineer.Department.Name
+                DSSN:sitesupervisor.DSSN,
+                FName:sitesupervisor.FName,
+                LName:sitesupervisor.LName,
+                Image:sitesupervisor.Image,
+                Adress:sitesupervisor.Adress,
+                Phone:sitesupervisor.Phone,
+                Email:sitesupervisor.Email,
+                Age:sitesupervisor.Age,
+                WorkHours:sitesupervisor.WorkHours,
+                DepartmentCode:sitesupervisor.Department.Name
             }
 
         })
-        res.render('clinicalEngineer',{pageTitle:'Site Supervisor',CE:true,
-                                clinicalEngineers:clinicalengineers,hasEngineers:clinicalengineers.length>0});
+        res.render('siteSupervisor',{pageTitle:'Site Supervisor',CE:true,
+                                siteSupervisors:sitesupervisors,hasEngineers:sitesupervisors.length>0});
     })
     .catch(err => {
         if(err)
          res.render('error',{layout:false,pageTitle:'Error',href:'/home',message:'Sorry !!! Could Not Get Engineers'})
     })
     
-}
-
-exports.sparePart=(req,res)=>{
-    SparePart.findAll({include:[{model:AgentSupplier},{model:Equipment}]}).then(sparepart => {
-        const sp = sparepart.map(sparepart => {
-                  return {
-                    Code:sparepart.Code,
-                    Name:sparepart.Name,
-                    Amount:sparepart.Amount,
-                    Image:sparepart.Image,
-                    AgentSupplierId:sparepart.AgentSupplier.dataValues.Id,
-                    AgentSupplierName:sparepart.AgentSupplier.dataValues.Name,
-                    EquipmentCode:sparepart.Equipment.dataValues.Code,
-                    EquipmentName:sparepart.Equipment.dataValues.Name
-
-
-                  }
-                })
-        Equipment.findAll({include:[{model:Department}]}).then(equipments => {
-            const eq = equipments.map(equipment => {
-                return{
-                    Code:equipment.Code,
-                    Name:equipment.Name,
-                    DepartmentName:equipment.Department.Name
-                }
-            })
-        AgentSupplier.findAll().then(agents => {
-            const ag = agents.map(agent => {
-                return {
-                    Name:agent.Name,
-                    Id:agent.Id
-                }
-            })
-        res.render('sparePart',{pageTitle:'SpareParts',SP:true,SpareParts:sp,
-                                hasPart:sp.length>0,Equipments:eq,Agents:ag});
-        })    
-        })             
-
-}).catch( err=> {
-    if (err)
-     console.log(err)
-     res.render('error',{layout:false,pageTitle:'Error',href:'/home',message:'Sorry !!! Could Not Get Spare Parts'})
-})
 }
 
 exports.agentSupplier=(req,res)=>{
@@ -403,7 +200,7 @@ exports.agentSupplier=(req,res)=>{
 
 exports.workOrder=(req,res)=>{
 
-  WorkOrder.findAll({include:[{model:ClinicalEngineer},{model:Equipment}]}).then(workorders => {
+  WorkOrder.findAll({include:[{model:SiteSupervisor},{model:Equipment}]}).then(workorders => {
         const wd = workorders.map(workD => {
                   return {
                     Code:workD.Code,
@@ -418,17 +215,17 @@ exports.workOrder=(req,res)=>{
                     EquipmentImage:workD.Equipment.Image,
                     Priority:workD.Priority,
                     Description:workD.Description,
-                    ClinicalEnginner:workD.ClinicalEnginner.FName+' '+workD.ClinicalEnginner.LName,
-                    ClinicalEnginnerImage:workD.ClinicalEnginner.Image             
+                    SiteSupervisor:workD.SiteSupervisor.FName+' '+workD.SiteSupervisor.LName,
+                    SiteSupervisorImage:workD.SiteSupervisor.Image             
                   }
                 })
 
-        ClinicalEngineer.findAll().then(clinicalEngineers => {
-            const en=clinicalEngineers.map(clinicalEngineer => {
+        SiteSupervisor.findAll().then(siteSupervisors => {
+            const en=siteSupervisors.map(siteSupervisor => {
                 return {
-                    FName:clinicalEngineer.FName,
-                    LName:clinicalEngineer.LName,
-                    DSSN:clinicalEngineer.DSSN
+                    FName:siteSupervisor.FName,
+                    LName:siteSupervisor.LName,
+                    DSSN:siteSupervisor.DSSN
                 }
             })
         Equipment.findAll({include:[{model:Department}]}).then(equipments => {
@@ -451,37 +248,6 @@ exports.workOrder=(req,res)=>{
           res.render('error',{layout:false,pageTitle:'Error',href:'/home',message:'Sorry !!! Could Not Get WorkOrders'})
     })
 
-}
-
-exports.breakDown=(req,res)=>{
-    BreakDown.findAll({include:[{model:Equipment,include:[{model:Department}]}]}).then(breakdowns => {
-        const bd = breakdowns.map(breakD => {
-                  return {
-                    Code:breakD.Code,
-                    Reason:breakD.Reason,
-                    DATE:breakD.DATE,
-                    EquipmentCode:breakD.EquipmentCode,
-                    EquipmentName:breakD.Equipment.Name,
-                    EquipmentImage:breakD.Equipment.Image,
-                    Department:breakD.Equipment.Department.Name
-                  }
-                })
-        Equipment.findAll({include:[{model:Department}]}).then(equipments => {
-            const eqs = equipments.map(equipment => {
-                return{
-                    Name:equipment.Name,
-                    Code:equipment.Code,
-                    Department:equipment.Department.Name
-                }
-            })
-        res.render('breakDown',{pageTitle:'BreakDown',BreakDown:true,breakDowns:bd,
-                                    hasBreakDown:bd.length>0,Equipments:eqs});
-        })
-
-    }).catch(err => {
-        if(err)
-        res.render('error',{layout:false,pageTitle:'Error',href:'/home',message:'Sorry !!! Could Not Get BreakDowns'})
-    })
 }
 
 exports.equipment=(req,res)=>{
@@ -559,53 +325,21 @@ exports.installation=(req,res)=>{
         })
 }
 
-exports.ppm=(req,res) =>{
-PPM.findAll({include:[{model:Equipment,include:[{model:PpmQuestions}]},{model:ClinicalEngineer}]}).then(reports => {
-    const reps=reports.map(report =>{
-        return {
-        Code:report.Code,
-        DATE:report.DATE,
-        Engineer:report.ClinicalEnginner.FName+' '+report.ClinicalEnginner.LName,
-        EquipmentName:report.Equipment.Name,
-        EquipmentCode:report.Equipment.Code,
-        EquipmentModel:report.Equipment.Model,
-        Qs:report.Equipment.PpmQuestion,
-        Q1: report.Q1 == "on" ? true: false,
-        Q2: report.Q2 == "on" ? true: false,
-        Q3: report.Q3 == "on" ? true: false,
-        Q4: report.Q4 == "on" ? true: false,
-        Q5: report.Q5 == "on" ? true: false,
-        N1:report.N1,
-        N2:report.N2,
-        N3:report.N3,
-        N4:report.N4,
-        N5:report.N5
-        }
-    })
-    res.render('ppmReportTable',{pageTitle:'PPM',
-        Reports:true,reports:reps,hasReports:reps.length>0,rep:true })   
-    
-}).catch(err => {
-    res.render('error',{layout:false,pageTitle:'Error',href:'/home',message:'Sorry !!! Could Not Get Reports'})
-
-})
-}
-
 exports.dailyInspection=(req,res)=>{
- DailyInspection.findAll({include:[{model:Equipment},{model:ClinicalEngineer}]})
+ DailyInspection.findAll({include:[{model:Equipment},{model:SiteSupervisor}]})
  .then(reports => {
     const reps=reports.map(report => {
         return{
             Code:report.Code,
             DATE:report.DATE,
-            Engineer:report.ClinicalEnginner.FName +' '+ report.ClinicalEnginner.LName ,
+            Engineer:report.SiteSupervisor.FName +' '+ report.SiteSupervisor.LName ,
             Equipment:report.Equipment.Name,
             eq:true,
             EquipmentModel:report.Equipment.Model
         }
 
  })
- res.render('dialyinspectionTable',{pageTitle:'Daily Inspection',
+ res.render('dailyinspectionTable',{pageTitle:'Daily Inspection',
     Reports:true,eq:true,reports:reps,hasReports:reps.length>0 })  
 }).catch(err => {
     res.render('error',{layout:false,pageTitle:'Error',href:'/',message:'Sorry !!! Could Not Get Report'})
@@ -617,7 +351,7 @@ exports.dailyInspection=(req,res)=>{
 
 exports.workorder=(req,res) =>{
 dssn=req.session.DSSN
-WorkOrder.findAll({where:{ClinicalEnginnerDSSN:dssn}}).then(orders => {
+WorkOrder.findAll({where:{SiteSupervisorDSSN:dssn}}).then(orders => {
     var events=orders.map(order => {
         return{
             title:order.Description,
@@ -629,7 +363,7 @@ WorkOrder.findAll({where:{ClinicalEnginnerDSSN:dssn}}).then(orders => {
 
     })
 
-    ClinicalEngineer.findByPk(engineerId).then(engineer => {
+    SiteSupervisor.findByPk(engineerId).then(engineer => {
         const Engineer ={
             Image:engineer.Image,
             FName:engineer.FName,
@@ -662,13 +396,13 @@ exports.workorderDescription=(req,res)=>{
             Description:order.Description
 
         }
-        ClinicalEngineer.findByPk(engineerId).then(engineer => {
+        SiteSupervisor.findByPk(engineerId).then(engineer => {
             const Engineer ={
                 Image:engineer.Image,
                 FName:engineer.FName,
                 LName:engineer.LName
             }
-        res.render('workOrderDetails',{layout:'clinicalEngineerLayout',pageTitle:'Work Order',
+        res.render('workOrderDetails',{layout:'siteSupervisorLayout',pageTitle:'Work Order',
                 WO:true,order:order,Engineer,Engineer})
         })    
     }).catch(err => {

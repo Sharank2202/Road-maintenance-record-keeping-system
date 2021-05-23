@@ -1,12 +1,9 @@
 const bcrypt = require('bcryptjs')
 const Department = require('../models/department')
 const AgentSupplier = require('../models/agent_supplier')
-const ClinicalEngineer=require('../models/clinical_engineer')
+const SiteSupervisor=require('../models/site_supervisor')
 const Equipment =require('../models/equipment')
-const SpareParts = require('../models/spare_part')
-const BreakDowns = require('../models/break_down')
 const WorkOrders = require('../models/work_order')
-const Maintenance = require('../models/maintenance')
 
 
 
@@ -55,7 +52,7 @@ exports.addAgentSupplier=(req,res)=>{
 }
 
 
-exports.addClinicalEngineer=(req,res)=>{
+exports.addSiteSupervisor=(req,res)=>{
     dssn=req.body.DSSN
     fname=req.body.FName
     lname=req.body.LName
@@ -91,32 +88,32 @@ exports.addClinicalEngineer=(req,res)=>{
         if (department){
 
             departmentCode=department.Code
-            ClinicalEngineer.findByPk(dssn).then(clinicalEngineer=>{
-                if(clinicalEngineer){
-                    clinicalEngineer.DSSN=dssn
-                    clinicalEngineer.FName=fname
-                    clinicalEngineer.LName=lname
-                    clinicalEngineer.Adress=address
-                    clinicalEngineer.Phone=phone
-                    clinicalEngineer.Email=email
-                    clinicalEngineer.Image=image
-                    clinicalEngineer.Age=age
-                    clinicalEngineer.WorkHours=workhours
-                    clinicalEngineer.DepartmentCode=departmentCode
-                    clinicalEngineer.save().then(r => res.redirect('/clinicalEngineer'))
+            SiteSupervisor.findByPk(dssn).then(siteSupervisor=>{
+                if(siteSupervisor){
+                    siteSupervisor.DSSN=dssn
+                    siteSupervisor.FName=fname
+                    siteSupervisor.LName=lname
+                    siteSupervisor.Adress=address
+                    siteSupervisor.Phone=phone
+                    siteSupervisor.Email=email
+                    siteSupervisor.Image=image
+                    siteSupervisor.Age=age
+                    siteSupervisor.WorkHours=workhours
+                    siteSupervisor.DepartmentCode=departmentCode
+                    siteSupervisor.save().then(r => res.redirect('/siteSupervisor'))
                 }
                 else{
                     
-                    ClinicalEngineer.create({DSSN:dssn,FName:fname,
+                    SiteSupervisor.create({DSSN:dssn,FName:fname,
                             LName:lname,Adress:address,Phone:phone,Image:image,
                             Email:email,Age:age,WorkHours:workhours,
                             DepartmentCode:departmentCode,Password:pass
-                        }).then(r => res.redirect('/clinicalEngineer'))
+                        }).then(r => res.redirect('/siteSupervisor'))
                 }
             })
         }
         else{
-            res.render('error',{layout:false,pageTitle:'Error',href:'/clinicalEngineer',message:'Sorry !!! Could Not Get this Department'})                
+            res.render('error',{layout:false,pageTitle:'Error',href:'/siteSupervisor',message:'Sorry !!! Could Not Get this Department'})                
 
         }
     })
@@ -203,84 +200,6 @@ exports.addEquipment=(req,res) => {
 
 }
 
-
-exports.addSpareParts=(req,res)=>{
-    code=req.body.Code
-    name=req.body.Name
-    amount=req.body.Amount
-    agentId=req.body.AgentSupplierId
-    equipmentCode=req.body.EquipmentCode
-    if(req.body.edit){
-        image=req.body.Image
-    }
-    else{
-        image=req.file.path.split('\\')
-        if (image.length>1)
-            image=req.file.path.split('\\').pop()
-        else    
-            image=req.file.path.split('/').pop()
-           
-       }
-    AgentSupplier.findOne({where:{Id:agentId}}).then(agent =>{
-        if(agent){
-            SpareParts.findByPk(code).then(part=>{
-                if(part){
-                    part.Code=code
-                    part.Name=name
-                    part.Amount=amount
-                    part.AgentSupplierId=agentId
-                    part.EquipmentCode=equipmentCode
-                    part.Image=image
-                    part.save().then(p => res.redirect('/sparePart'))
-                }
-                else{
-                    SpareParts.create({Code:code,Name:name,Amount:amount,AgentSupplierId:agentId,Image:image,EquipmentCode:equipmentCode})
-                    .then(res.redirect('/sparePart'))
-                }
-        
-            })
-        }
-        else
-         return res.render('error',{layout:false,pageTitle:'Error',href:'/sparePart',message:'Sorry !!! Could Not Get this Agent'})
-        
-    }).catch(err=> {
-        res.render('error',{layout:false,pageTitle:'Error',href:'/sparePart',message:'Sorry !!! Could Not Gey rhis page'})
-        })
-
-}
-
-
-
-exports.addBreakDown=(req,res)=>{
-    code=req.body.Code
-    reason=req.body.Reason
-    date=req.body.DATE
-    equipmentId=req.body.EquipmentCode
-    Equipment.findOne({where:{Code:equipmentId}}).then(Equipment =>{
-        if(Equipment){
-            BreakDowns.findByPk(code).then(breakD=>{
-                if(breakD){
-                    breakD.Code=code
-                    breakD.Reason=reason
-                    breakD.DATE=date
-                    breakD.EquipmentCode=equipmentId
-                    breakD.save().then(res.redirect('/breakDown'))
-                }
-        
-                BreakDowns.create({Code:code,Reason:reason,DATE:date,EquipmentCode:equipmentId})
-                .then(res.redirect('/breakDown'))
-                .catch(err=> {
-                    console.log("ERROR!!!!!!",err)
-                    })
-                })
-        }
-        else
-         return res.render('error',{layout:false,pageTitle:'Error',href:'/breakDown',message:'Sorry !!! Could Not Get this Equipment'})
-        
-    })
-
-}
-
 exports.addWorkOrder=(req,res) => {
     code =req.body.Code
     cost=req.body.Cost
@@ -289,15 +208,15 @@ exports.addWorkOrder=(req,res) => {
     description=req.body.Description
     priority = req.body.Priority
     equipmentId=req.body.EquipmentCode
-    engineerId=req.body.ClinicalEngineerDSSN
+    engineerId=req.body.SiteSupervisorDSSN
     var equId=null
     var engId=null
     Equipment.findOne({where:{Code:equipmentId}}).then(equipment => { 
         if(equipment){
             equId=equipment.Code
-            ClinicalEngineer.findOne({where:{DSSN:engineerId}}).then(clinicalengineer =>{
-                if(clinicalengineer){
-                    engId = clinicalengineer.DSSN
+            SiteSupervisor.findOne({where:{DSSN:engineerId}}).then(sitesupervisor =>{
+                if(sitesupervisor){
+                    engId = sitesupervisor.DSSN
                     WorkOrders.findByPk(code).then(workorder=>{
                         if(workorder){
                             workorder.StartDATE=startdate
@@ -305,13 +224,13 @@ exports.addWorkOrder=(req,res) => {
                             workorder.Description=description
                             workorder.Cost=cost
                             workorder.EquipmentCode=equId
-                            workorder.ClinicalEngineerDSSN=engId
+                            workorder.SiteSupervisorDSSN=engId
                             workorder.Priority=priority
                             workorder.save().then(workorder => res.redirect('/workOrder'))
                         }
                         else {
                             WorkOrders.create({StartDate:startdate,EndDate:enddate,Description:description,
-                            Cost:cost,EquipmentCode:equId,ClinicalEnginnerDSSN:engId,Priority:priority})
+                            Cost:cost,EquipmentCode:equId,SiteSupervisorDSSN:engId,Priority:priority})
                             .then(workorder => res.redirect('/workOrder') )
                             }
                    })
@@ -335,42 +254,5 @@ exports.addWorkOrder=(req,res) => {
 
           
     })
-
-}
-
-
-exports.addMaintenance=(req,res)=>{
-    code=req.body.Id
-    dssn=req.body.DSSN
-    startdate=req.body.StartDate
-    enddate=req.body.EndDate
-    breakdowncode=req.body.BreakDownID
-    description=req.body.Description
-    var breakdown = null
-    BreakDowns.findOne({where:{Code:breakdowncode}}).then(breakdown =>{
-        if(breakdown){
-            Maintenance.findByPk(code).then(main=>{
-                if(main){
-                    main.StartDate=startdate
-                    main.EndDate=enddate
-                    main.BreakDownCode=breakdowncode
-                    main.Description=description
-                    main.ClinicalEnginnerDSSN=dssn
-                    main.save().then(p => res.redirect('/maintenance'))
-                }
-                else{
-                    Maintenance.create({StartDate:startdate,EndDate:enddate,ClinicalEnginnerDSSN:dssn,BreakDownCode:breakdowncode,Description:description})
-                    .then(res.redirect('/maintenance'))
-                }
-        
-            })
-        }
-        else
-         return res.render('error',{layout:false,pageTitle:'Error',href:'/maintenance',message:'Sorry !!! Could Not Get this Break down'})
-         console.log(err)
-        
-    }).catch(err=> {
-        console.log("ERROR!!!!!!",err)
-        })
 
 }

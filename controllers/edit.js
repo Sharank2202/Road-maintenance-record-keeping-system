@@ -1,10 +1,7 @@
 const AgentSupplier = require('../models/agent_supplier');
-const ClinicalEngineer = require('../models/clinical_engineer');
+const SiteSupervisor = require('../models/site_supervisor');
 const Equipment =require('../models/equipment')
-const SparePart =require('../models/spare_part');
-const BreakDown =require('../models/break_down');
 const WorkOrder =require('../models/work_order');
-const Maintenance =require('../models/maintenance');
 
 
 
@@ -33,28 +30,28 @@ exports.editAgentSupplier=(req,res)=>{
 
 
 
-exports.editClinicalEngineer=(req,res) => {
+exports.editSiteSupervisor=(req,res) => {
     dssn=req.params.id
-    ClinicalEngineer.findOne({where:{DSSN:dssn},include:[{model:Department}]}).then(clinicalEngineer => { 
+    SiteSupervisor.findOne({where:{DSSN:dssn},include:[{model:Department}]}).then(siteSupervisor => { 
         const cs = {
-              FName: clinicalEngineer.FName,
-              LName: clinicalEngineer.LName,
-              DSSN: clinicalEngineer.DSSN,
-              Adress: clinicalEngineer.Adress,
-              Phone:clinicalEngineer.Phone,
-              WorkHours:clinicalEngineer.WorkHours,
-              Email:clinicalEngineer.Email,
-              Age:clinicalEngineer.Age,
-              Image:clinicalEngineer.Image,
-              OR:clinicalEngineer.Department.Name =='OR' ? true : false,
-              CSSD:clinicalEngineer.Department.Name =='CSSD' ? true:false,
-              ICU:clinicalEngineer.Department.Name=='ICU' ? true:false,
-              Radiology:clinicalEngineer.Department.Name == 'Radiology' ? true:false
+              FName: siteSupervisor.FName,
+              LName: siteSupervisor.LName,
+              DSSN: siteSupervisor.DSSN,
+              Adress: siteSupervisor.Adress,
+              Phone:siteSupervisor.Phone,
+              WorkHours:siteSupervisor.WorkHours,
+              Email:siteSupervisor.Email,
+              Age:siteSupervisor.Age,
+              Image:siteSupervisor.Image,
+              RB:siteSupervisor.Department.Name =='R&B' ? true : false,
+              MRTH:siteSupervisor.Department.Name =='MRTH' ? true:false,
+              NHAI:siteSupervisor.Department.Name=='NHAI' ? true:false,
+              IRCC:siteSupervisor.Department.Name == 'IRCC' ? true:false
             }
     
     console.log(cs)    
-    res.render('editClinicalEngineer',{layout:'main-layout.handlebars' ,pageTitle:'Edit',
-                                     CE:true,clinicalEngineer:cs});
+    res.render('editSiteSupervisor',{layout:'main-layout.handlebars' ,pageTitle:'Edit',
+                                     CE:true,siteSupervisor:cs});
  })
  .catch(err => 
    {
@@ -88,10 +85,10 @@ exports.editClinicalEngineer=(req,res) => {
               Image:equipment.Image,
               DepartmentCode:equipment.DepartmentCode,
               AgentSupplierId:equipment.AgentSupplierId,
-              OR:equipment.Department.Name =='OR' ? true : false,
-              CSSD:equipment.Department.Name =='CSSD' ? true:false,
-              ICU:equipment.Department.Name=='ICU' ? true:false,
-              Radiology:equipment.Department.Name == 'Radiology' ? true:false
+              RB:equipment.Department.Name =='R&B' ? true : false,
+              CSSD:equipment.Department.Name =='MRTH' ? true:false,
+              NHAI:equipment.Department.Name=='NHAI' ? true:false,
+              IRCC:equipment.Department.Name == 'IRCC' ? true:false
             }
    if(eq.PM =="Annualy"){
       res.render('editEquipment',{layout:'main-layout.handlebars' ,pageTitle:'Edit',
@@ -110,47 +107,6 @@ exports.editClinicalEngineer=(req,res) => {
 
  }
 
-
-
- exports.editSparePart=(req,res)=>{
-   code=req.params.id
-   SparePart.findByPk(code).then(sparePart =>{ 
-       const sp = {
-             Name: sparePart.Name,
-             Code: sparePart.Code,
-             Amount:sparePart.Amount,
-             Image:sparePart.Image,
-             AgentSupplierId:sparePart.AgentSupplierId,
-             EquipmentCode:sparePart.EquipmentCode
-           }
-       
-   res.render('editSparePart',{layout:'main-layout.handlebars' ,pageTitle:'Edit',
-                                    SP:true,sparePart:sp});
-})
-   .catch(err => console.log("ERROR!!!!!!",err) )
-
-
-}
-
-exports.editBreakDown=(req,res)=>{
-   code=req.params.id
-   BreakDown.findByPk(code).then(breakDown =>{ 
-       const bd = {
-         Code:breakDown.Code,
-         Reason:breakDown.Reason,
-         DATE:breakDown.DATE,
-         EquipmentCode:breakDown.EquipmentCode
-           }
-   
-       
-   res.render('editBreakDown',{layout:'main-layout.handlebars' ,pageTitle:'Edit',
-                                                   BreakDown:true,breakDown:bd});
-})
-   .catch(err => console.log("ERROR!!!!!!",err) )
-
-
-}
-
 exports.editWorkOrder=(req,res)=>{
    code = req.params.id
    WorkOrder.findByPk(code).then(workOrder=>{
@@ -165,37 +121,12 @@ exports.editWorkOrder=(req,res)=>{
          med:workOrder.Priority=='Medium'?true:false,
          high:workOrder.Priority=='High'?true:false,
          low:workOrder.Priority=='Low'?true:false,
-         ClinicalEnginnerDSSN:workOrder.ClinicalEnginnerDSSN 
+         SiteSupervisorDSSN:workOrder.SiteSupervisorDSSN 
 
       }
 
    res.render('editWorkOrder',{layout:'main-layout.handlebars',pageTitle:'Edit',
                                        WO:true,workOrder:wd});
-
-
-
-   })
-
-     .catch(err=>console.log("errorrrrr",err))
-
-}
-
-
-exports.editMaintenance=(req,res)=>{
-   id = req.params.id
-   Maintenance.findByPk(id).then(maintenance=>{
-      const m = {
-         Id:maintenance.Id,
-         StartDate:maintenance.StartDate,
-         EndDate:maintenance.EndDate,
-         BreakDownCode:maintenance.BreakDownCode,
-         Description:maintenance.Description,
-         ClinicalEnginnerDSSN:maintenance.ClinicalEnginnerDSSN
-         
-      }
-
-   res.render('editMaintenance',{layout:'main-layout.handlebars',pageTitle:'Edit',
-                                       Maintenance:true,maintenance:m});
 
 
 

@@ -1,6 +1,6 @@
 const Sequelize=require('sequelize');
 
-const sequelize = new Sequelize('cmms','root','mysql',{
+const sequelize = new Sequelize('rms','root','mysql',{
     host:'localhost',
     dialect:'mysql'
    

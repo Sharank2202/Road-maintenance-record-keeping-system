@@ -1,10 +1,7 @@
 const AgentSupplier = require('../models/agent_supplier')
-const ClinicalEngineer=require('../models/clinical_engineer')
+const SiteSupervisor=require('../models/site_supervisor')
 const Equipment =require('../models/equipment')
-const SparePart=require('../models/spare_part')
-const BreakDown=require('../models/break_down')
 const WorkOrder=require('../models/work_order')
-const Maintenance = require('../models/maintenance')
 
 
 exports.deleteAgentSupplier=(req,res)=>{
@@ -19,10 +16,10 @@ exports.deleteAgentSupplier=(req,res)=>{
  }
 
 
- exports.deleteClinicalEngineer=(req,res)=>{
+ exports.deleteSiteSupervisor=(req,res)=>{
     dssn=req.params.id
-    ClinicalEngineer.findByPk(dssn).then(clinicalEngineer =>{ 
-     clinicalEngineer.destroy().then( res.redirect('/clinicalEngineer'))
+    SiteSupervisor.findByPk(dssn).then(siteSupervisor =>{ 
+     siteSupervisor.destroy().then( res.redirect('/siteSupervisor'))
     
  })
     .catch(err => console.log("ERROR!!!!!!",err) )
@@ -40,26 +37,6 @@ exports.deleteAgentSupplier=(req,res)=>{
     .catch(err => console.log("ERROR!!!!!!",err) )
  }
 
- exports.deleteSparePart=(req,res)=>{
-    code=req.params.id
-    SparePart.findByPk(code).then(sparepart=>{ 
-    sparepart.destroy().then(res.redirect('/sparePart'))
-        
- })
-    .catch(err => console.log("ERROR!!!!!!",err) )
- }
-
-
- exports.deleteBreakDown=(req,res)=>{
-    code=req.params.id
-    BreakDown.findByPk(code).then(breakdown=>{ 
-    console.log(code)
-     breakdown.destroy().then(res.redirect('/breakDown'))
-     
- })
-    .catch(err => console.log("ERROR!!!!!!",err) )
- }
-
  exports.deleteWorkOrder=(req,res)=>{
     code=req.params.id
     WorkOrder.findByPk(code).then(workorder=>{ 
@@ -69,14 +46,3 @@ exports.deleteAgentSupplier=(req,res)=>{
  })
     .catch(err => console.log("ERROR!!!!!!",err) )
  }
-
- exports.deleteMaintenance=(req,res)=>{
-   code=req.params.id
-   Maintenance.findByPk(code).then(maintenance=>{ 
-   console.log(code)
-    maintenance.destroy().then( res.redirect('/maintenance'))
-   
-})
-   .catch(err => console.log("ERROR!!!!!!",err) )
-}
-
